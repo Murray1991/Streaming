@@ -211,8 +211,10 @@ public class PrimeSequential {
 	  int currentSize1 = batchSize1;
 	  int currentSize2 = batchSize2;
 
+	  long startTime = System.currentTimeMillis();
 	  ArrayList<String> prunedGraph = new ArrayList<>();
 	  for (int i = 0; i < nBatches; i++) {
+		  long t1 = System.currentTimeMillis();
 		  ArrayList<EntityProfile> batch = new ArrayList<>();
 
 		  for (int j = 0; j < batchSize1; j++) {
@@ -237,8 +239,12 @@ public class PrimeSequential {
 
 		  System.out.println("Send batch #"+i+" of size "+batch.size());
 		  prunedGraph.addAll(process(batch));
-		  System.out.println("No of comparisons: "+ numberOfComparisons);
+		  long t2 = System.currentTimeMillis();
+		  System.out.println("Time #"+i+": "+(t2-t1)+" ms");
+		  //System.out.println("No of comparisons: "+ numberOfComparisons);
 	  }
+	  long endTime = System.currentTimeMillis();
+	  System.out.println("End-to-end time: "+(endTime-startTime)+" ms");
 
 	  try {
 		  PrintWriter pr = new PrintWriter("./outputs/sequential/file.txt");

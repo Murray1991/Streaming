@@ -152,7 +152,6 @@ public class IncrementalQualityEvaluation {
     		}
 		}
     	
-        
 		int duplicadasIdentificadas = 0;
 		int groundtruthSize = groundtruthCleaned.size();
 		HashSet<IdDuplicates> groundtruthMatched = new HashSet<IdDuplicates>();
