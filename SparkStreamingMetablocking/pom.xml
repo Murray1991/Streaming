@@ -4,14 +4,31 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.spirom</groupId>
-    <artifactId>learning-spark-with-java</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>com.github.streaming</groupId>
+    <artifactId>prime</artifactId>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <build>
+    <plugins>
+    <plugin>
+    <!-- NOTE: We don't need a groupId specification because the group is
+         org.apache.maven.plugins ...which is assumed by default.
+     -->
+    <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+            <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+        </configuration>
+        </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
 
@@ -23,6 +40,16 @@
             <systemPath>${project.basedir}/libs/JInsect.jar</systemPath>
         </dependency>
 
+        <!--
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql-kafka-0-10_2.11</artifactId>
+            <version>2.3.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/spark-sql-kafka-0-10_2.11-2.1.0.cloudera1.jar</systemPath>
+        </dependency>
+        -->
+
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.11</artifactId>
@@ -33,28 +60,31 @@
             <artifactId>spark-streaming_2.11</artifactId>
             <version>2.3.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.11</artifactId>
             <version>2.3.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming-kafka-0-8_2.11</artifactId>
             <version>2.3.0</version>
         </dependency>
-        
+
         <dependency>
 		    <groupId>org.apache.spark</groupId>
 		    <artifactId>spark-sql-kafka-0-10_2.11</artifactId>
 		    <version>2.3.0</version>
 		</dependency>
-		
+
 		<dependency>
 		    <groupId>org.apache.lucene</groupId>
 		    <artifactId>lucene-analyzers</artifactId>
 		    <version>3.6.2</version>
 		</dependency>
+
     </dependencies>
 
 
