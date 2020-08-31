@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ProdAddr=localhost:9092
-ProdTime=15
-D1=inputs/dataset1_abt
-D2=inputs/dataset2_buy
+ProdTime=600
+D1=inputs/dataset1_imdb
+D2=inputs/dataset2_dbpedia
 Batches=10
 
 mkdir -p outputs/
