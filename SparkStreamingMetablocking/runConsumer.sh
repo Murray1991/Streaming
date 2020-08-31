@@ -6,13 +6,13 @@ ProdAddr=localhost:9092
 WinTime=10
 #Args(1) == ProdAddr
 WinSlidingTime=80
-ConsOutput=outputs/abtbuy/test.txt
+ConsOutput=outputs/movies/test.txt
 ConsCheckpoint=checkpoint/
 ConsNodes=1
 
 
 mkdir -p outputs/
-mkdir -p outputs/abtbuy
+mkdir -p outputs/movies
 mkdir -p checkpoint/
 
 rm  outputs/abtbuy/*
