@@ -8,6 +8,6 @@ mkdir -p outputs/
 mkdir -p outputs/sequential/
 
 echo "run sequential"
-java -Xmx20g -cp target/prime-1.0-jar-with-dependencies.jar PrimeApproach.PrimeSequential ${D1} ${D2} ${Batches}
+java -Xmx50g -cp target/prime-1.0-jar-with-dependencies.jar PrimeApproach.PrimeSequential ${D1} ${D2} ${Batches}
 
 
