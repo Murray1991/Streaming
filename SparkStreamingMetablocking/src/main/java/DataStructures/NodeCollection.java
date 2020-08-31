@@ -1,5 +1,7 @@
 package DataStructures;
 
+import org.w3c.dom.NodeList;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,14 @@ public class NodeCollection implements Serializable{
 			}
 		}
 		copy = null;
+	}
+
+	public NodeCollection clone() {
+		NodeCollection nc = new NodeCollection();
+		for (Node node: this.nodeList) {
+			nc.add(node.clone());
+		}
+		return nc;
 	}
 	
 	

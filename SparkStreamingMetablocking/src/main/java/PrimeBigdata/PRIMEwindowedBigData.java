@@ -97,7 +97,7 @@ public static void main(String[] args) throws InterruptedException, StreamingQue
 	SparkSession spark = SparkSession
 	        .builder()
 	        .appName("PRIMEwindowedBigData")
-	        .master("local[4]")
+	        //.master("local[4]")
 	        .getOrCreate();
 	
 	JavaSparkContext jssc = new JavaSparkContext(spark.sparkContext());
@@ -305,10 +305,10 @@ public static void main(String[] args) throws InterruptedException, StreamingQue
     		System.out.println("Number of Comparisons: " + numberOfComparisons.value());
     			
     		    if(!rdd.isEmpty()){
-//    		    	for (String string : rdd.collect()) {
-//						System.out.println(string);
-//					}
-//    		       rdd.saveAsTextFile(OUTPUT_PATH);
+    		    	/*for (String string : rdd.collect()) {
+						System.out.println(string);
+					}
+    		       rdd.saveAsTextFile(OUTPUT_PATH);*/
     		    }
     	});
         

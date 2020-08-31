@@ -50,8 +50,13 @@ public class KafkaConsumerStreamingControl {
         int increment = 0;
 
         while (true) {
+            System.out.println("Waiting message");
+
             final ConsumerRecords<Long, String> consumerRecords =
                     consumer.poll(windowPoll);
+
+            System.out.println("-- Received message");
+
             if (System.currentTimeMillis() - initialTime > timeDeadline && consumerRecords.count()==0) {
             	initialTime = System.currentTimeMillis();
             	increment++;

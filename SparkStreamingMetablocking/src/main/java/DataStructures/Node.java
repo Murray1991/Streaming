@@ -1,6 +1,7 @@
 package DataStructures;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -102,15 +103,24 @@ public class Node implements Serializable {
 		this.sumWeight += neighbor._2();
 		this.numberOfNeighbors ++;
 		this.neighbors.add(neighbor);
+		if (this.neighbors.size() != this.numberOfNeighbors) {
+			System.out.println("ERROR");
+		}
 	}
-	
+
 	public void addSetNeighbors(Node n2) {
 		this.sumWeight += n2.sumWeight;
 		this.numberOfNeighbors += n2.numberOfNeighbors;
 		this.neighbors.addAll(n2.getNeighbors());
+		if (this.neighbors.size() != this.numberOfNeighbors) {
+			System.out.println("ERROR");
+		}
 	}
 	
 	public void pruning() {
+//		List<Tuple2<Integer, Double>> neighbors = new ArrayList<Tuple2<Integer, Double>>(this.neighbors);
+//		neighbors.sort((c1,c2)->{return Integer.compare(c1._1(), c2._1());});
+
 		double threshold = sumWeight/numberOfNeighbors;
 		Set<Tuple2<Integer, Double>> prunnedNeighbors = new HashSet<>();
 		
@@ -172,7 +182,12 @@ public class Node implements Serializable {
 	@Override
 	public String toString() {
 //		String output = id + ":";
+//
+//		List<Tuple2<Integer, Double>> neighbors = new ArrayList<Tuple2<Integer, Double>>(this.neighbors);
+//		neighbors.sort((c1,c2)->{return Integer.compare(c1._1(), c2._1());});
+
 		String output = "";
+
 		for (Tuple2<Integer, Double> neighbor : neighbors) {
 			output += neighbor._1() + ",";
 		}
@@ -200,5 +215,14 @@ public class Node implements Serializable {
 		this.startTime = startTime;
 	}
 	
-	
+	public Node clone() {
+		Set<Integer> nBlocks = new HashSet<>(this.blocks);
+		Set<Tuple2<Integer,Double>> nNeighbors = new HashSet<>(this.neighbors);
+		Node n = new Node(this.id, nBlocks, nNeighbors, this.isSource);
+		n.marked = this.marked;
+		n.numberOfNeighbors = this.numberOfNeighbors;
+		n.sumWeight = this.sumWeight;
+
+		return n;
+	}
 }
