@@ -3,19 +3,18 @@
 ProdAddr=localhost:9092
 
 #ConsAddr=localhost:9092
-WinTime=10
+WinTime=20
 #Args(1) == ProdAddr
 WinSlidingTime=80
 ConsOutput=outputs/movies/test.txt
 ConsCheckpoint=checkpoint/
 ConsNodes=1
 
-
 mkdir -p outputs/
 mkdir -p outputs/movies
 mkdir -p checkpoint/
 
-rm  outputs/abtbuy/*
+rm  outputs/movies/*
 
 echo "run consumer"
 #java -cp target/prime-1.0-jar-with-dependencies.jar PrimeApproach.PRIMEStructuredAndMatching ${ConsTime} ${ProdAddr} ${ConsTime2} ${ConsOutput} ${ConsCheckpoint} ${ConsNodes}
@@ -28,7 +27,7 @@ spark-submit \
   --class PrimeApproach.PRIMEStructured \
   --master local[1] \
   --deploy-mode client \
-  --executor-memory 8G \
+  --executor-memory 40G \
   --num-executors 1 \
   --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.2.0 \
   target/prime-1.0-jar-with-dependencies.jar \
