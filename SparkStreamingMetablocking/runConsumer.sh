@@ -7,14 +7,22 @@ WinTime=20
 #Args(1) == ProdAddr
 WinSlidingTime=80
 ConsOutput=outputs/movies/test.txt
+#ConsOutput=outputs/agp/test.txt
+
 ConsCheckpoint=checkpoint/
 ConsNodes=1
 
 mkdir -p outputs/
 mkdir -p outputs/movies
+mkdir -p outputs/agp
 mkdir -p checkpoint/
+mkdir -p outputs/old
+
+cp -r outputs/movies/ outputs/old/
+cp -r outputs/agp/ outputs/old/
 
 rm  outputs/movies/*
+rm  outputs/agp/*
 
 echo "run consumer"
 #java -cp target/prime-1.0-jar-with-dependencies.jar PrimeApproach.PRIMEStructuredAndMatching ${ConsTime} ${ProdAddr} ${ConsTime2} ${ConsOutput} ${ConsCheckpoint} ${ConsNodes}

@@ -4,6 +4,11 @@ ProdAddr=localhost:9092
 ProdTime=600
 D1=inputs/dataset1_imdb
 D2=inputs/dataset2_dbpedia
+
+#ProdTime=300
+#D1=inputs/dataset1_amazon
+#D2=inputs/dataset2_gp
+
 Batches=10
 
 mkdir -p outputs/
