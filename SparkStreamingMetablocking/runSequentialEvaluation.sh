@@ -1,6 +1,7 @@
 #!/bin/bash
 
 GT=inputs/groundtruth_imdbdbpedia
+#GT=inputs/groundtruth_amazongp
 D=outputs/sequential/
 
 mkdir -p outputs/
