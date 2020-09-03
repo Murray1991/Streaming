@@ -10,6 +10,8 @@ import scala.Tuple2;
 import scala.noinline;
 import scala.annotation.elidable;
 
+import javax.swing.text.html.parser.Entity;
+
 public class Node implements Serializable {
 	private static final long serialVersionUID = -6462453052244774523L;
 	private int id;
@@ -22,8 +24,7 @@ public class Node implements Serializable {
 	private Integer tokenTemporary;
 	private boolean blackFlag = false;
 	private long startTime;
-	
-	
+
 	public Node(int id, Set<Integer> blocks, Set<Tuple2<Integer, Double>> neighbors, boolean isSource) {
 		super();
 		this.id = id;
@@ -32,6 +33,7 @@ public class Node implements Serializable {
 		this.isSource = isSource;
 		this.startTime = System.currentTimeMillis();
 	}
+
 	
 //	public Node(int id, Set<Integer> blocks, Set<Tuple2<Integer, Double>> neighbors, boolean isSource, Integer tokenTemporary) {
 //		super();
@@ -57,8 +59,6 @@ public class Node implements Serializable {
 		this.isSource = false;
 		this.startTime = System.currentTimeMillis();
 	}
-	
-
 
 	public boolean isSource() {
 		return isSource;
@@ -104,7 +104,7 @@ public class Node implements Serializable {
 		this.numberOfNeighbors ++;
 		this.neighbors.add(neighbor);
 		if (this.neighbors.size() != this.numberOfNeighbors) {
-			System.out.println("ERROR");
+			//System.out.println("ERROR");
 		}
 	}
 
@@ -113,7 +113,7 @@ public class Node implements Serializable {
 		this.numberOfNeighbors += n2.numberOfNeighbors;
 		this.neighbors.addAll(n2.getNeighbors());
 		if (this.neighbors.size() != this.numberOfNeighbors) {
-			System.out.println("ERROR");
+			//System.out.println("ERROR");
 		}
 	}
 	

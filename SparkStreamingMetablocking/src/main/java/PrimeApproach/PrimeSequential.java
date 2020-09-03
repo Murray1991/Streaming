@@ -1,11 +1,8 @@
 package PrimeApproach;
 
-import DataStructures.Attribute;
-import DataStructures.EntityProfile;
-import DataStructures.Node;
-import DataStructures.NodeCollection;
-import DataStructures.BlockCollection;
+import DataStructures.*;
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.hadoop.util.hash.Hash;
 import scala.Tuple2;
 import tokens.KeywordGenerator;
 import tokens.KeywordGeneratorImpl;
@@ -21,8 +18,25 @@ import java.util.stream.Collectors;
 //20 localhost:9092 60
 public class PrimeSequential {
 
+	public static HashMap<Integer, TextModel> index0 = new HashMap<>();
+	public static HashMap<Integer, TextModel> index1 = new HashMap<>();
+
 	public static BlockCollection state = new BlockCollection();
 	public static int numberOfComparisons = 0;
+
+	public static TextModel getEntity(int dIdx, int idx) {
+		if (dIdx == 0) {
+			return index0.get(idx);
+		} else return index1.get(idx);
+	}
+
+	public static void putEntity(int dIdx, int idx, EntityProfile p) {
+		if (dIdx == 0) {
+			if (!index0.containsKey(idx))
+				index0.put(idx, new TextModel(p));
+		} else if (!index1.containsKey(idx))
+			index1.put(idx, new TextModel(p));
+	}
 
 	public static ArrayList<EntityProfile> readDataset(String INPUT_PATH) throws InterruptedException {
 		ArrayList<EntityProfile> EntityList = null;
@@ -40,6 +54,27 @@ public class PrimeSequential {
 		}
 
 		return EntityList;
+	}
+
+	public static void jaccardSimilarity(Node n) {
+		int dIdx = n.isSource() ? 0 : 1;
+		TextModel e1 = getEntity(dIdx, n.getId());
+		final HashMap<String, Integer> itemsFrequency = e1.getItemsFrequency();
+
+		Set<Tuple2<Integer, Double>> updatedNeighbors = new HashSet<>();
+		for (Tuple2<Integer, Double> neighbor : n.getNeighbors()) {
+			int dIdx2 = n.isSource() ? 1 : 0;
+			TextModel e2 = getEntity(dIdx2, neighbor._1());
+
+			final Set<String> commonKeys = new HashSet<>(itemsFrequency.keySet());
+			commonKeys.retainAll(e2.getItemsFrequency().keySet());
+
+			double numerator = commonKeys.size();
+			double denominator = itemsFrequency.size() + e2.getItemsFrequency().size() - numerator;
+			updatedNeighbors.add(new Tuple2<>(neighbor._1(), numerator/denominator));
+		}
+
+		n.setNeighbors(updatedNeighbors);
 	}
 
 	private static double calculateSimilarity(Integer blockKey, Set<Integer> ent1, Set<Integer> ent2) {
@@ -60,7 +95,7 @@ public class PrimeSequential {
 		}
 	}
 
-	public static List<String> process(ArrayList<EntityProfile> entities) {
+	public static List<Node> process(ArrayList<EntityProfile> entities) {
 
 		//BlockCollection state = new BlockCollection();
 
@@ -79,6 +114,8 @@ public class PrimeSequential {
 			}
 
 			Node node = new Node(se.getKey(), cleanTokens, new HashSet<>(), se.isSource());
+			int dIdx = node.isSource()? 0: 1;
+			putEntity(dIdx, node.getId(), se);
 
 			for (Integer tk : cleanTokens) {
 				node.setTokenTemporary(tk);
@@ -111,6 +148,7 @@ public class PrimeSequential {
 			}
 
 			Tuple2<Integer, NodeCollection> thisOne = new Tuple2<>(key, count);
+
 			state.update(key.intValue(), count.clone());
 
 			// Result = 0
@@ -169,7 +207,7 @@ public class PrimeSequential {
 		Map<Integer, List<Tuple2<Integer,Node>>> graph = pairEntityBlock.stream()
 				.collect(Collectors.groupingBy(Tuple2::_1));
 
-		List<String> prunedGraph = graph.entrySet().stream().map(e -> {
+		List<Node> prunedGraph = graph.entrySet().stream().map(e -> {
 
 			Integer key = e.getKey();
 			List<Tuple2<Integer, Node>> nodes = e.getValue();
@@ -185,7 +223,7 @@ public class PrimeSequential {
 
 			n1.pruning();
 
-			return n1.getId() + "," + n1.toString();
+			return n1;
 			//return ""+nodes.get(0)._2.getId();
 		}).collect(Collectors.toList());
 
@@ -206,13 +244,16 @@ public class PrimeSequential {
 	  double size2 = EntityListTarget.size();
 	  int nBatches = Integer.parseInt(args[2]);
 
+	  boolean saveFile = Integer.parseInt(args[3]) == 0 ? false : true;
+
+
 	  int batchSize1 = (int) Math.ceil(size1/(double)nBatches) +1;
 	  int batchSize2 = (int) Math.ceil(size2/(double)nBatches) +1;
 	  int currentSize1 = batchSize1;
 	  int currentSize2 = batchSize2;
 
 	  long startTime = System.currentTimeMillis();
-	  ArrayList<String> prunedGraph = new ArrayList<>();
+	  ArrayList<Node> prunedGraph = new ArrayList<>();
 	  for (int i = 0; i < nBatches; i++) {
 		  long t1 = System.currentTimeMillis();
 		  ArrayList<EntityProfile> batch = new ArrayList<>();
@@ -238,7 +279,16 @@ public class PrimeSequential {
 		  }
 
 		  System.out.println("Send batch #"+i+" of size "+batch.size());
-		  prunedGraph.addAll(process(batch));
+		  List<Node> nodes = process(batch);
+
+		  // Execute
+		  for (Node n: nodes) {
+		  	jaccardSimilarity(n);
+		  }
+
+		  if (saveFile)
+		  	prunedGraph.addAll(nodes);
+
 		  long t2 = System.currentTimeMillis();
 		  System.out.println("Time #"+i+": "+(t2-t1)+" ms");
 		  //System.out.println("No of comparisons: "+ numberOfComparisons);
@@ -246,17 +296,19 @@ public class PrimeSequential {
 	  long endTime = System.currentTimeMillis();
 	  System.out.println("End-to-end time: "+(endTime-startTime)+" ms");
 
-	  try {
-		  PrintWriter pr = new PrintWriter("./outputs/sequential/file.txt");
-		  for (String line : prunedGraph) {
-			  pr.println(line);
+	  if (saveFile) {
+		  try {
+			  PrintWriter pr = new PrintWriter("./outputs/sequential/file.txt");
+			  for (Node node : prunedGraph) {
+			  	  String line = node.getId() + "," + node.toString();
+				  pr.println(line);
+			  }
+			  pr.close();
+		  } catch (Exception e) {
+			  e.printStackTrace();
+			  System.out.println("No such file exists.");
 		  }
-		  pr.close();
-	  } catch (Exception e) {
-		  e.printStackTrace();
-		  System.out.println("No such file exists.");
 	  }
-
 
   }
 }
