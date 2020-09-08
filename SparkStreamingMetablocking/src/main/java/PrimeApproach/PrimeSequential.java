@@ -246,7 +246,7 @@ public class PrimeSequential {
 	  int nBatches = Integer.parseInt(args[2]);
 
 	  boolean saveFile = Integer.parseInt(args[3]) == 0 ? false : true;
-
+	  System.out.println("Store file? " + saveFile);
 
 	  int batchSize1 = (int) Math.ceil(size1/(double)nBatches) +1;
 	  int batchSize2 = (int) Math.ceil(size2/(double)nBatches) +1;
