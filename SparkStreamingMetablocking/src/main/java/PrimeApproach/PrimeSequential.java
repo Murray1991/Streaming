@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 //20 localhost:9092 60
 public class PrimeSequential {
 
-	public static HashMap<Integer, TextModel> index0 = new HashMap<>();
-	public static HashMap<Integer, TextModel> index1 = new HashMap<>();
+	final public static HashMap<Integer, TextModel> index0 = new HashMap<>();
+	final public static HashMap<Integer, TextModel> index1 = new HashMap<>();
 
-	public static BlockCollection state = new BlockCollection();
+	final public static BlockCollection state = new BlockCollection();
 	public static int numberOfComparisons = 0;
 
 	public static TextModel getEntity(int dIdx, int idx) {
@@ -235,8 +235,8 @@ public class PrimeSequential {
 
   public static void main(String[] args) throws InterruptedException {
 
-	  ArrayList<EntityProfile> EntityListSource = readDataset(args[0]);
-	  ArrayList<EntityProfile> EntityListTarget = readDataset(args[1]);
+	  final ArrayList<EntityProfile> EntityListSource = readDataset(args[0]);
+	  final ArrayList<EntityProfile> EntityListTarget = readDataset(args[1]);
 
 	  System.out.println("D1 size:"+EntityListSource.size());
 	  System.out.println("D2 size:"+EntityListTarget.size());
@@ -271,28 +271,29 @@ public class PrimeSequential {
 
 	  long total = 0;
 	  long startTime = System.currentTimeMillis();
-	  ArrayList<Node> prunedGraph = new ArrayList<>();
+	  final ArrayList<Node> prunedGraph = new ArrayList<>();
+	  final StringBuffer sb = new StringBuffer();
 
-	  Iterator<List<EntityProfile>>  it1 = groupedEntityListSource.iterator();
-	  Iterator<List<EntityProfile>>  it2 = groupedEntityListTarget.iterator();
+	  final Iterator<List<EntityProfile>>  it1 = groupedEntityListSource.iterator();
+	  final Iterator<List<EntityProfile>>  it2 = groupedEntityListTarget.iterator();
       for (int i = 0; i < nBatches; i++) {
 		long t1 = System.currentTimeMillis();
       	if (it1.hasNext() && it2.hasNext()) {
-      		List<EntityProfile> p1 = it1.next();
-      		List<EntityProfile> p2 = it2.next();
+      		final List<EntityProfile> p1 = it1.next();
+      		final List<EntityProfile> p2 = it2.next();
 			int nMax = Math.max(p1.size(), p2.size());
 			ArrayList<EntityProfile> batch = new ArrayList<>();
 			for (int j = 0; j < nMax ; j++) {
 				if (p1.size() > j) {
 					int idx = i * batchSize1 + j;
-					EntityProfile entitySource = p1.get(j);
+					final EntityProfile entitySource = p1.get(j);
 					entitySource.setSource(true);
 					entitySource.setKey(idx);
 					batch.add(entitySource);
 				}
 				if (p2.size() > j) {
 					int idx = i * batchSize2 + j;
-					EntityProfile entityTarget = p2.get(j);
+					final EntityProfile entityTarget = p2.get(j);
 					entityTarget.setSource(false);
 					entityTarget.setKey(idx);
 					batch.add(entityTarget);
@@ -300,15 +301,21 @@ public class PrimeSequential {
 			}
 
 			System.out.println("Send batch #"+i+" of size "+batch.size());
-			List<Node> nodes = process(batch);
+			final List<Node> nodes = process(batch);
 
 			// Execute
 			for (Node n: nodes) {
 				jaccardSimilarity(n);
+				if (saveFile) {
+					sb.append(n.getId());
+					sb.append(",");
+				    sb.append(n.toString());
+					sb.append("\n");
+				}
 			}
 
-			if (saveFile)
-				prunedGraph.addAll(nodes);
+			//if (saveFile)
+			//	prunedGraph.addAll(nodes);
 
 			long t2 = System.currentTimeMillis();
 			total += (t2-t1);
@@ -379,10 +386,11 @@ public class PrimeSequential {
 		  	  String file = "./outputs/sequential/b"+nBatches+"/file.txt";
 		  	  System.out.println("Store block graph in "+file);
 			  PrintWriter pr = new PrintWriter(file);
-			  for (Node node : prunedGraph) {
-			  	  String line = node.getId() + "," + node.toString();
-				  pr.println(line);
-			  }
+			  pr.print(sb.toString());
+			  //for (Node node : prunedGraph) {
+			  //	  String line = node.getId() + "," + node.toString();
+			   //	  pr.println(line);
+			  //}
 			  pr.close();
 		  } catch (Exception e) {
 			  e.printStackTrace();
