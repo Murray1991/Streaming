@@ -1,8 +1,6 @@
 package PrimeApproach;
 
 import DataStructures.*;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.hadoop.util.hash.Hash;
 import scala.Tuple2;
 import tokens.KeywordGenerator;
 import tokens.KeywordGeneratorImpl;
@@ -11,13 +9,12 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
 //Parallel-based Metablockig for Streaming Data
 //20 localhost:9092 60
-public class PrimeSequential {
+public class PrimeSequentialBakup {
 
 	public static HashMap<Integer, TextModel> index0 = new HashMap<>();
 	public static HashMap<Integer, TextModel> index1 = new HashMap<>();
@@ -246,131 +243,60 @@ public class PrimeSequential {
 	  double size2 = EntityListTarget.size();
 	  int nBatches = Integer.parseInt(args[2]);
 
-	  int batchSize1 = (int) Math.ceil((double) size1/ (double) nBatches);
-	  int batchSize2 = (int) Math.ceil((double) size2/ (double) nBatches);
-
-	  final int chunkSize1 = batchSize1;
-	  final int chunkSize2 = batchSize2;
-	  final AtomicInteger counter = new AtomicInteger();
-
-	  final Collection<List<EntityProfile>> groupedEntityListSource = EntityListSource.stream()
-			  .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / batchSize1))
-			  .values();
-
-	  counter.set(0);
-
-	  final Collection<List<EntityProfile>> groupedEntityListTarget = EntityListTarget.stream()
-			  .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / batchSize2))
-			  .values();
-
-	  ArrayList<String> csvLines = new ArrayList<>();
-
-
 	  boolean saveFile = Integer.parseInt(args[3]) == 0 ? false : true;
 	  System.out.println("Store file? " + saveFile);
+
+	  int batchSize1 = (int) Math.ceil(size1/(double)nBatches) +1;
+	  int batchSize2 = (int) Math.ceil(size2/(double)nBatches) +1;
+	  int currentSize1 = batchSize1;
+	  int currentSize2 = batchSize2;
+
+	  ArrayList<String> csvLines = new ArrayList<>();
 
 	  long total = 0;
 	  long startTime = System.currentTimeMillis();
 	  ArrayList<Node> prunedGraph = new ArrayList<>();
+	  for (int i = 0; i < nBatches; i++) {
+		  long t1 = System.currentTimeMillis();
+		  ArrayList<EntityProfile> batch = new ArrayList<>();
 
-	  Iterator<List<EntityProfile>>  it1 = groupedEntityListSource.iterator();
-	  Iterator<List<EntityProfile>>  it2 = groupedEntityListTarget.iterator();
-      for (int i = 0; i < nBatches; i++) {
-		long t1 = System.currentTimeMillis();
-      	if (it1.hasNext() && it2.hasNext()) {
-      		List<EntityProfile> p1 = it1.next();
-      		List<EntityProfile> p2 = it2.next();
-			int nMax = Math.max(p1.size(), p2.size());
-			ArrayList<EntityProfile> batch = new ArrayList<>();
-			for (int j = 0; j < nMax ; j++) {
-				if (p1.size() > j) {
-					int idx = i * batchSize1 + j;
-					EntityProfile entitySource = p1.get(j);
-					entitySource.setSource(true);
-					entitySource.setKey(idx);
-					batch.add(entitySource);
-				}
-				if (p2.size() > j) {
-					int idx = i * batchSize2 + j;
-					EntityProfile entityTarget = p2.get(j);
-					entityTarget.setSource(false);
-					entityTarget.setKey(idx);
-					batch.add(entityTarget);
-				}
-			}
+		  for (int j = 0; j < batchSize1; j++) {
+			  int idx = i * batchSize1 + j;
+			  if (idx < EntityListSource.size()) {
+				  EntityProfile entitySource = EntityListSource.get(idx);
+				  entitySource.setSource(true);
+				  entitySource.setKey(idx);
+				  batch.add(new EntityProfile(entitySource.getStandardFormat()));
+			  }
+		  }
 
-			System.out.println("Send batch #"+i+" of size "+batch.size());
-			List<Node> nodes = process(batch);
+		  for (int j = 0; j < batchSize2; j++) {
+			  int idx = i * batchSize2 + j;
+			  if (idx < EntityListTarget.size()) {
+				  EntityProfile entityTarget = EntityListTarget.get(idx);
+				  entityTarget.setSource(false);
+				  entityTarget.setKey(idx);
+				  batch.add(new EntityProfile(entityTarget.getStandardFormat()));
+			  }
+		  }
 
-			// Execute
-			for (Node n: nodes) {
-				jaccardSimilarity(n);
-			}
+		  System.out.println("Send batch #"+i+" of size "+batch.size());
+		  List<Node> nodes = process(batch);
 
-			if (saveFile)
-				prunedGraph.addAll(nodes);
+		  // Execute
+		  for (Node n: nodes) {
+		  	jaccardSimilarity(n);
+		  }
 
-			long t2 = System.currentTimeMillis();
-			total += (t2-t1);
-			csvLines.add("Pi-Block,"+(i+1)+","+(t2-t1)+","+total+","+numberOfComparisons+",0");
-			System.out.println("Time #"+i+": "+(t2-t1)+" ms");
-		}
+		  if (saveFile)
+		  	prunedGraph.addAll(nodes);
+
+		  long t2 = System.currentTimeMillis();
+		  total += (t2-t1);
+		  csvLines.add("Pi-Block,"+(i+1)+","+(t2-t1)+","+total+","+numberOfComparisons+",0");
+		  System.out.println("Time #"+i+": "+(t2-t1)+" ms");
+		  //System.out.println("No of comparisons: "+ numberOfComparisons);
 	  }
-//
-//	  boolean saveFile = Integer.parseInt(args[3]) == 0 ? false : true;
-//	  System.out.println("Store file? " + saveFile);
-//
-//	  int batchSize1 = (int) Math.ceil(size1/(double)nBatches) +1;
-//	  int batchSize2 = (int) Math.ceil(size2/(double)nBatches) +1;
-//	  int currentSize1 = batchSize1;
-//	  int currentSize2 = batchSize2;
-//
-//	  ArrayList<String> csvLines = new ArrayList<>();
-//
-//	  long total = 0;
-//	  long startTime = System.currentTimeMillis();
-//	  ArrayList<Node> prunedGraph = new ArrayList<>();
-//	  for (int i = 0; i < nBatches; i++) {
-//		  long t1 = System.currentTimeMillis();
-//		  ArrayList<EntityProfile> batch = new ArrayList<>();
-//
-//		  for (int j = 0; j < batchSize1; j++) {
-//			  int idx = i * batchSize1 + j;
-//			  if (idx < EntityListSource.size()) {
-//				  EntityProfile entitySource = EntityListSource.get(idx);
-//				  entitySource.setSource(true);
-//				  entitySource.setKey(idx);
-//				  batch.add(new EntityProfile(entitySource.getStandardFormat()));
-//			  }
-//		  }
-//
-//		  for (int j = 0; j < batchSize2; j++) {
-//			  int idx = i * batchSize2 + j;
-//			  if (idx < EntityListTarget.size()) {
-//				  EntityProfile entityTarget = EntityListTarget.get(idx);
-//				  entityTarget.setSource(false);
-//				  entityTarget.setKey(idx);
-//				  batch.add(new EntityProfile(entityTarget.getStandardFormat()));
-//			  }
-//		  }
-//
-//		  System.out.println("Send batch #"+i+" of size "+batch.size());
-//		  List<Node> nodes = process(batch);
-//
-//		  // Execute
-//		  for (Node n: nodes) {
-//		  	jaccardSimilarity(n);
-//		  }
-//
-//		  if (saveFile)
-//		  	prunedGraph.addAll(nodes);
-//
-//		  long t2 = System.currentTimeMillis();
-//		  total += (t2-t1);
-//		  csvLines.add("Pi-Block,"+(i+1)+","+(t2-t1)+","+total+","+numberOfComparisons+",0");
-//		  System.out.println("Time #"+i+": "+(t2-t1)+" ms");
-//		  //System.out.println("No of comparisons: "+ numberOfComparisons);
-//	  }
 	  long endTime = System.currentTimeMillis();
 	  System.out.println("End-to-end time: "+(endTime-startTime)+" ms");
 
