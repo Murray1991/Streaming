@@ -304,7 +304,9 @@ public class PrimeSequential {
 
 	  if (saveFile) {
 		  try {
-			  PrintWriter pr = new PrintWriter("./outputs/sequential/b"+nBatches+"/file.txt");
+		  	  String file = "./outputs/sequential/b"+nBatches+"/file.txt";
+		  	  System.out.println("Store block graph in "+file);
+			  PrintWriter pr = new PrintWriter(file);
 			  for (Node node : prunedGraph) {
 			  	  String line = node.getId() + "," + node.toString();
 				  pr.println(line);
@@ -316,7 +318,8 @@ public class PrimeSequential {
 		  }
 
 		  try {
-			  PrintWriter pr = new PrintWriter("./outputs/"+"b"+nBatches+"file.txt");
+			  String file = "./outputs/b"+nBatches+"/res.txt";
+			  PrintWriter pr = new PrintWriter(file);
 			  for (String line : csvLines) {
 				  pr.println(line);
 			  }
