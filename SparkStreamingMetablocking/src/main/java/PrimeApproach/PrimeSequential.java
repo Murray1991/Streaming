@@ -71,6 +71,7 @@ public class PrimeSequential {
 
 			double numerator = commonKeys.size();
 			double denominator = itemsFrequency.size() + e2.getItemsFrequency().size() - numerator;
+			numberOfComparisons++;
 			updatedNeighbors.add(new Tuple2<>(neighbor._1(), numerator/denominator));
 		}
 
@@ -194,7 +195,7 @@ public class PrimeSequential {
 
 			for (Node node : entitiesToCompare) {
 				if (node.isSource()) {
-					numberOfComparisons+=(node.getNeighbors().size());
+					//numberOfComparisons+=(node.getNeighbors().size());
 					output.add(new Tuple2<Integer, Node>(node.getId(), node));
 				}
 			}
@@ -252,6 +253,9 @@ public class PrimeSequential {
 	  int currentSize1 = batchSize1;
 	  int currentSize2 = batchSize2;
 
+	  ArrayList<String> csvLines = new ArrayList<>();
+
+	  long total = 0;
 	  long startTime = System.currentTimeMillis();
 	  ArrayList<Node> prunedGraph = new ArrayList<>();
 	  for (int i = 0; i < nBatches; i++) {
@@ -290,6 +294,8 @@ public class PrimeSequential {
 		  	prunedGraph.addAll(nodes);
 
 		  long t2 = System.currentTimeMillis();
+		  total += (t2-t1);
+		  csvLines.add("Pi-Block,"+(i+1)+","+(t2-t1)+","+total+","+numberOfComparisons+",0");
 		  System.out.println("Time #"+i+": "+(t2-t1)+" ms");
 		  //System.out.println("No of comparisons: "+ numberOfComparisons);
 	  }
@@ -298,9 +304,20 @@ public class PrimeSequential {
 
 	  if (saveFile) {
 		  try {
-			  PrintWriter pr = new PrintWriter("./outputs/sequential/file.txt");
+			  PrintWriter pr = new PrintWriter("./outputs/sequential/b"+nBatches+"/file.txt");
 			  for (Node node : prunedGraph) {
 			  	  String line = node.getId() + "," + node.toString();
+				  pr.println(line);
+			  }
+			  pr.close();
+		  } catch (Exception e) {
+			  e.printStackTrace();
+			  System.out.println("No such file exists.");
+		  }
+
+		  try {
+			  PrintWriter pr = new PrintWriter("./outputs/"+"b"+nBatches+"file.txt");
+			  for (String line : csvLines) {
 				  pr.println(line);
 			  }
 			  pr.close();
