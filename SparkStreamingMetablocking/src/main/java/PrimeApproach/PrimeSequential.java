@@ -272,7 +272,7 @@ public class PrimeSequential {
 	  long total = 0;
 	  long startTime = System.currentTimeMillis();
 	  final ArrayList<Node> prunedGraph = new ArrayList<>();
-	  final StringBuffer sb = new StringBuffer();
+	  final StringBuilder sb = new StringBuilder();
 
 	  final Iterator<List<EntityProfile>>  it1 = groupedEntityListSource.iterator();
 	  final Iterator<List<EntityProfile>>  it2 = groupedEntityListTarget.iterator();
