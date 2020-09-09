@@ -280,9 +280,7 @@ public class PRIMEStructuredWindowed {
 	  .option("topic", "outputtopic")
 	  .trigger(Trigger.ProcessingTime(timeWindow + " seconds"))
 	  .start();
-    
-    
-    
+
     // Start running the query that prints the running counts to the console
 	/*StreamingQuery query = prunedGraph.writeStream()
 		.outputMode("update")

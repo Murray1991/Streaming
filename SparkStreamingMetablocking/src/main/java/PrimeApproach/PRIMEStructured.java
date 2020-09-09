@@ -314,27 +314,27 @@ public class PRIMEStructured {
 	});
     		
     //Streaming query that stores the output incrementally.
-//    StreamingQuery query = prunedGraph
-//	  .selectExpr("CAST(value AS STRING)")
-//	  .writeStream()
-//	  .outputMode("update")
-//	  .format("kafka")
-//	  .option("kafka.bootstrap.servers", args[1])
-//	  .option("checkpointLocation", args[4])//C:\\Users\\lutibr\\Documents\\checkpoint\\
-//	  .option("topic", "outputtopic")
-//	  .trigger(Trigger.ProcessingTime(timeWindow + " seconds"))
-//	  .start();
+    StreamingQuery query = prunedGraph
+	  .selectExpr("CAST(value AS STRING)")
+	  .writeStream()
+	  .outputMode("update")
+	  .format("kafka")
+	  .option("kafka.bootstrap.servers", args[1])
+	  .option("checkpointLocation", args[4])//C:\\Users\\lutibr\\Documents\\checkpoint\\
+	  .option("topic", "outputtopic")
+	  .trigger(Trigger.ProcessingTime(timeWindow + " seconds"))
+	  .start();
 
 
     // Start running the query that prints the running counts to the console
-	/*StreamingQuery query = prunedGraph.writeStream()
-		.outputMode("update")
-		.format("console")
-		// .format("parquet") // can be "orc", "json", "csv", etc.
-		// .option("checkpointLocation", "checkpoints/")
-		// .option("path", OUTPUT_PATH)
-		.trigger(Trigger.ProcessingTime(timeWindow + " seconds"))
-		.start();*/
+//	StreamingQuery query = prunedGraph.writeStream()
+//		.outputMode("update")
+//		.format("console")
+//		// .format("parquet") // can be "orc", "json", "csv", etc.
+//		// .option("checkpointLocation", "checkpoints/")
+//		// .option("path", OUTPUT_PATH)
+//		.trigger(Trigger.ProcessingTime(timeWindow + " seconds"))
+//		.start();
     
 //    StreamingQuery query = prunedGraph.selectExpr("CAST(value AS STRING)").writeStream()
 //    		.outputMode("update")
@@ -343,35 +343,35 @@ public class PRIMEStructured {
 //			.option("topic", "outputTopic")
 //			.start();
     
-    StreamingQuery query = prunedGraph.writeStream()
-    		.outputMode("update")
-    		.foreach(new ForeachWriter<String>() {
-    			SingletonFileWriter writer;
-
-				@Override
-				public void process(String line) {
-					//System.out.println(line);
-					try {
-						writer.save(line);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						System.out.println("Error to save the output file.");
-					}
-				}
-
-				@Override
-				public boolean open(long elementID, long increment) {
-					writer = SingletonFileWriter.getInstance(OUTPUT_PATH, increment);
-					return true;
-				}
-
-				@Override
-				public void close(Throwable arg0) {
-				}
-			})
-    		.trigger(Trigger.ProcessingTime(timeWindow + " seconds"))
-    		.start();
+//    StreamingQuery query = prunedGraph.writeStream()
+//    		.outputMode("update")
+//    		.foreach(new ForeachWriter<String>() {
+//    			SingletonFileWriter writer;
+//
+//				@Override
+//				public void process(String line) {
+//					//System.out.println(line);
+//					try {
+//						writer.save(line);
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//						System.out.println("Error to save the output file.");
+//					}
+//				}
+//
+//				@Override
+//				public boolean open(long elementID, long increment) {
+//					writer = SingletonFileWriter.getInstance(OUTPUT_PATH, increment);
+//					return true;
+//				}
+//
+//				@Override
+//				public void close(Throwable arg0) {
+//				}
+//			})
+//    		.trigger(Trigger.ProcessingTime(timeWindow + " seconds"))
+//    		.start();
 
     //System.out.println("No of comparisons: "+ numberOfComparisons.value());
 
