@@ -306,12 +306,12 @@ public class PrimeSequential {
 			// Execute
 			for (Node n: nodes) {
 				jaccardSimilarity(n);
-				if (saveFile) {
+				/*if (saveFile) {
 					sb.append(n.getId());
 					sb.append(",");
 				    sb.append(n.toString());
 					sb.append("\n");
-				}
+				}*/
 			}
 
 			//if (saveFile)
